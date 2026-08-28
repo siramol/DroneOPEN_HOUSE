@@ -1,8 +1,9 @@
+
 //THERE IS NO WARRANTY FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR 
 //OTHER PARTIES PROVIDE THE SOFTWARE “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
 //OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH THE CUSTOMER. SHOULD THE 
 //SOFTWARE PROVE DEFECTIVE, THE CUSTOMER ASSUMES THE COST OF ALL NECESSARY SERVICING, REPAIR, OR CORRECTION EXCEPT TO THE EXTENT SET OUT UNDER THE HARDWARE WARRANTY IN THESE TERMS.
-#include "soc/soc.h"
+#include "soc/soc.h"           
 #include "soc/rtc_cntl_reg.h"
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -11,10 +12,11 @@
 #include <Wire.h>
 #include <ESP32Servo.h> // Change to the standard Servo library for ESP32
 
+
 // REPLACE WITH YOUR NETWORK CREDENTIALS
 //COnnect your PC/mobile to this wifi and open the IP address from the serial monitor in your browser.
-const char* ssid = "2.4G_Chaigasit";
-const char* password = "0892723205";
+ const char* ssid = "2.4G_Chaigasit";
+ const char* password = "0892723205";
 
 float PRateRoll = 0.625; 
 float IRateRoll = 2.1;
@@ -34,8 +36,8 @@ float PRatePitch = PRateRoll;
 float IRatePitch = IRateRoll;
 float DRatePitch = DRateRoll;
 float PAnglePitch=PAngleRoll;
-float IAnglePitch=IAngleRoll;
-float DAnglePitch=DAngleRoll;
+ float IAnglePitch=IAngleRoll;
+ float DAnglePitch=DAngleRoll;
 uint32_t LoopTimer;
 float t=0.004;      //time cycle
 
@@ -73,11 +75,11 @@ volatile int channel_3_pwm_prev;
 volatile int channel_4_pwm_prev;
 volatile  int channel_1_pwm;
 volatile  int channel_2_pwm;
-volatile int channel_3_pwm;
-volatile int channel_4_pwm;
+ volatile int channel_3_pwm;
+ volatile int channel_4_pwm;
 float b=0.7;
 
-unsigned long channel_1_fs = 1500; //thro
+  unsigned long channel_1_fs = 1500; //thro
 unsigned long channel_2_fs = 1500; //ail
 unsigned long channel_3_fs = 1000; //elev
 unsigned long channel_4_fs = 1500; //rudd
@@ -142,7 +144,8 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
   Kalman1DOutput[1]=KalmanUncertainty;
 }
 
-void channelInterruptHandler()
+
+void IRAM_ATTR channelInterruptHandler()
 {
 current_time = micros(); if (digitalRead(channel_1_pin)) { if (last_channel_1 == 0) { last_channel_1 = 1; timer_1 = current_time; } } else if (last_channel_1 == 1) { last_channel_1 = 0; ReceiverValue[0] = current_time - timer_1; } 
 if (digitalRead(channel_2_pin)) { if (last_channel_2 == 0) { last_channel_2 = 1; timer_2 = current_time; } } else if (last_channel_2 == 1) { last_channel_2 = 0; ReceiverValue[1] = current_time - timer_2; } 
@@ -152,7 +155,6 @@ if (digitalRead(channel_5_pin)) { if (last_channel_5 == 0) { last_channel_5 = 1;
 if (digitalRead(channel_6_pin)) { if (last_channel_6 == 0) { last_channel_6 = 1; timer_6 = current_time; } } else if (last_channel_6 == 1) { last_channel_6 = 0; ReceiverValue[5] = current_time - timer_6; }
 }
 
-/* // --- DISABLED FOR TESTING ---
 void gyro_signals(void)
 {
 Wire.beginTransmission(0x68);
@@ -190,7 +192,6 @@ Wire.beginTransmission(0x68);
   AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*57.29; //*1/(3.142/180);
   AnglePitch=-atan(AccX/sqrt(AccY*AccY+AccZ*AccZ))*57.29;
 }
-*/
 
 void pid_equation(float Error, float P, float I, float D, float PrevError, float PrevIterm)
 {
@@ -369,8 +370,12 @@ else if(var == "tc"){
 return String();
 }
 
+
+
+
+
 void setup(void) {
-WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); // ปิดการตรวจจับไฟตก 
+WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); // ปิดการแจ้งเตือนไฟตกชั่วคราว
 Serial.begin(115200);
 
 //WIFI server setup START
@@ -387,7 +392,6 @@ Serial.begin(115200);
     }
   #endif
   WiFi.mode(WIFI_STA);
-  WiFi.setTxPower(WIFI_POWER_8_5dBm); // เพิ่มบรรทัดนี้เพื่อจำกัดการดึงกระแสไฟ
   WiFi.begin(ssid, password);
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("WiFi Failed!");
@@ -400,7 +404,7 @@ Serial.begin(115200);
   delay(2000);
   // Send web page with input fields to client
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
+    request->send(200, "text/html", index_html, processor);
   });
 
   // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
@@ -480,35 +484,33 @@ int led_time=100;
   delay(led_time);
 
 
-  // pinMode(channel_1_pin, INPUT_PULLUP);
-  // pinMode(channel_2_pin, INPUT_PULLUP);
-  // pinMode(channel_3_pin, INPUT_PULLUP);
-  // pinMode(channel_4_pin, INPUT_PULLUP);
-  // pinMode(channel_5_pin, INPUT_PULLUP);
-  // pinMode(channel_6_pin, INPUT_PULLUP);
+  pinMode(channel_1_pin, INPUT_PULLUP);
+  pinMode(channel_2_pin, INPUT_PULLUP);
+  pinMode(channel_3_pin, INPUT_PULLUP);
+  pinMode(channel_4_pin, INPUT_PULLUP);
+  pinMode(channel_5_pin, INPUT_PULLUP);
+  pinMode(channel_6_pin, INPUT_PULLUP);
 
-  // attachInterrupt(digitalPinToInterrupt(channel_1_pin), channelInterruptHandler, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(channel_2_pin), channelInterruptHandler, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(channel_3_pin), channelInterruptHandler, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(channel_4_pin), channelInterruptHandler, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(channel_5_pin), channelInterruptHandler, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(channel_6_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_1_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_2_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_3_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_4_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_5_pin), channelInterruptHandler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(channel_6_pin), channelInterruptHandler, CHANGE);
   delay(100);
   
-  /* --- DISABLED FOR TESTING ---
-  Wire.setClock(400000);
-  Wire.begin();
+  Wire.begin(21, 22);       // เปิดระบบและระบุขาให้ชัดเจน
+  Wire.setClock(400000);   // ตั้งความเร็วทีหลัง
   delay(250);
   Wire.beginTransmission(0x68);
   Wire.write(0x6B);
   Wire.write(0x00);
   Wire.endTransmission();
-  */
 
-  ESP32PWM::allocateTimer(0);
-  ESP32PWM::allocateTimer(1);
-  ESP32PWM::allocateTimer(2);
-  ESP32PWM::allocateTimer(3);
+ 	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
 
   delay(1000);
   mot1.attach(mot1_pin,1000,2000);
@@ -539,12 +541,12 @@ int led_time=100;
   digitalWrite(15, LOW);
   delay(500);
 
-RateCalibrationRoll=0.27;
-RateCalibrationPitch=-0.85;
-RateCalibrationYaw=-2.09;
-AccXCalibration=0.03;
-AccYCalibration=0.01;
-AccZCalibration=-0.07;
+  RateCalibrationRoll=-1.54;
+  RateCalibrationPitch=1.95;
+  RateCalibrationYaw=-0.35;
+  AccXCalibration=0.05;
+  AccYCalibration=-0.02;
+  AccZCalibration=-2.03;
 
 LoopTimer = micros();
 
@@ -580,9 +582,7 @@ t = readFile(SPIFFS, "/tc.txt").toFloat();
 
 
   //enter your loop code here
-  
-  /* --- DISABLED FOR TESTING ---
-  Wire.beginTransmission(0x68);
+Wire.beginTransmission(0x68);
   Wire.write(0x1A);
   Wire.write(0x05);
   Wire.endTransmission();
@@ -614,15 +614,6 @@ t = readFile(SPIFFS, "/tc.txt").toFloat();
   AccX=(float)AccXLSB/4096;
   AccY=(float)AccYLSB/4096;
   AccZ=(float)AccZLSB/4096;
-  ---------------------------- */
-  
-  // --- INJECT DUMMY DATA FOR TESTING ---
-  RateRoll = 0.0;
-  RatePitch = 0.0;
-  RateYaw = 0.0;
-  AccX = 0.0;
-  AccY = 0.0;
-  AccZ = 1.0; // 1.0G on Z axis to prevent divide-by-zero error in atan()
 
 
 RateRoll -= RateCalibrationRoll;
@@ -635,6 +626,31 @@ AccZ -= AccZCalibration;
 
   AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*57.29;
   AnglePitch=-atan(AccX/sqrt(AccY*AccY+AccZ*AccZ))*57.29;
+
+// // Inlined Kalman Filter computation in the loop
+// KalmanAngleRoll += t * RateRoll;
+// KalmanUncertaintyAngleRoll += t * t * 16; // Variance of IMU (4 deg/s) squared
+// KalmanGainRoll = KalmanUncertaintyAngleRoll / (KalmanUncertaintyAngleRoll + 9); // Error variance (3 deg) squared
+// KalmanAngleRoll += KalmanGainRoll * (AngleRoll - KalmanAngleRoll);
+// KalmanUncertaintyAngleRoll *= (1 - KalmanGainRoll);
+
+// // Set output for Roll Kalman
+// Kalman1DOutput[0] = KalmanAngleRoll;
+// Kalman1DOutput[1] = KalmanUncertaintyAngleRoll;
+
+// // Inlined Kalman Filter computation for Pitch
+// KalmanAnglePitch += t * RatePitch;
+// KalmanUncertaintyAnglePitch += t * t * 16; // Variance of IMU (4 deg/s) squared
+// KalmanGainPitch = KalmanUncertaintyAnglePitch / (KalmanUncertaintyAnglePitch + 9); // Error variance (3 deg) squared
+// KalmanAnglePitch += KalmanGainPitch * (AnglePitch - KalmanAnglePitch);
+// KalmanUncertaintyAnglePitch *= (1 - KalmanGainPitch);
+
+// // Set output for Pitch Kalman
+// Kalman1DOutput[0] = KalmanAnglePitch;
+// Kalman1DOutput[1] = KalmanUncertaintyAnglePitch;
+
+// KalmanAngleRoll = (KalmanAngleRoll > 20) ? 20 : ((KalmanAngleRoll < -20) ? -20 : KalmanAngleRoll);
+// KalmanAnglePitch = (KalmanAnglePitch > 20) ? 20 : ((KalmanAnglePitch < -20) ? -20 : KalmanAnglePitch);
 
 
 complementaryAngleRoll=0.991*(complementaryAngleRoll+RateRoll*t) + 0.009*AngleRoll;
@@ -782,7 +798,7 @@ PrevItermRateYaw = ItermYaw;
 
   PrevErrorRateRoll=0; PrevErrorRatePitch=0; PrevErrorRateYaw=0;
   PrevItermRateRoll=0; PrevItermRatePitch=0; PrevItermRateYaw=0;
-  PrevErrorAngleRoll=0; PrevErrorAnglePitch=0;     
+  PrevErrorAngleRoll=0; PrevErrorAnglePitch=0;    
   PrevItermAngleRoll=0; PrevItermAnglePitch=0;
   
   }
@@ -793,6 +809,185 @@ mot2.writeMicroseconds(MotorInput2);
 mot3.writeMicroseconds(MotorInput3);
 mot4.writeMicroseconds(MotorInput4);
 
+
+
+//Reciever signals
+  // Serial.print(ReceiverValue[0]);
+  // Serial.print(" ");
+  // Serial.print(ReceiverValue[1]);
+  // Serial.print(" ");
+  // Serial.print(ReceiverValue[2]);
+  // Serial.print(" ");
+  // Serial.print(ReceiverValue[3]);
+  // Serial.print(" ");
+
+  // // Print PWM values with labels
+  // Serial.print("channel_1_pwm:");
+  // Serial.print(channel_1_pwm);
+  // Serial.print(" ");
+
+  // Serial.print("channel_2_pwm:");
+  // Serial.print(channel_2_pwm);
+  // Serial.print(" ");
+
+  // Serial.print("channel_3_pwm:");
+  // Serial.print(channel_3_pwm);
+  // Serial.print(" ");
+
+  // Serial.print("channel_4_pwm:");
+  // Serial.print(channel_4_pwm);
+  // Serial.print(" ");
+
+//  // Print Receiver signals with labels
+   //Serial.print("ReceiverValue_0:");
+   //Serial.print(ReceiverValue[0]);
+   //Serial.print(" ");
+
+   //Serial.print("ReceiverValue_1:");
+   //Serial.print(ReceiverValue[1]);
+   //Serial.print(" ");
+
+   //Serial.print("ReceiverValue_2:");
+   //Serial.print(ReceiverValue[2]);
+   //Serial.print(" ");
+
+   //Serial.print("ReceiverValue_3:");
+   //Serial.println(ReceiverValue[3]);
+   //Serial.print(" ");
+
+//   Serial.print("MotorInput1:");
+//   Serial.print(MotorInput1);
+//   Serial.print(" ");
+
+//   Serial.print("MotorInput2:");
+//   Serial.print(MotorInput2);
+//   Serial.print(" ");
+
+//   Serial.print("MotorInput3:");
+//   Serial.print(MotorInput3);
+//   Serial.print(" ");
+
+//   Serial.print("MotorInput4:");
+//   Serial.println(MotorInput4); // End the line for Serial Plotter to process
+
+
+
+  // Serial.print(channel_1_pwm);
+  //   Serial.print(" ");
+  // Serial.print(channel_2_pwm);
+  //   Serial.print(" ");
+  // Serial.print(channel_3_pwm);
+  //   Serial.print(" ");
+  // Serial.print(channel_4_pwm);
+  //   Serial.print(" ");
+
+//Reciever signals
+
+  // Serial.println(ReceiverValue[0]);
+  // Serial.print(" ");
+  // Serial.print(ReceiverValue[1]);
+  // Serial.print(" ");
+  // Serial.print(ReceiverValue[2]);
+  // Serial.print(" ");
+  // Serial.println(ReceiverValue[3]);
+  // Serial.print("  ");
+ 
+  // Serial.print(ReceiverValue[4]);
+  // Serial.print(" - ");
+  // Serial.print(ReceiverValue[5]);
+  // Serial.print(" - ");
+
+
+
+//Motor PWMs in us
+  // Serial.print("MotVals-");
+  // Serial.print(MotorInput1);
+  // Serial.print("  ");
+  // Serial.print(MotorInput2);
+  // Serial.print("  ");
+  // Serial.print(MotorInput3);
+  // Serial.print("  ");
+  // Serial.print(MotorInput4);
+  // Serial.print(" ");
+
+// //Reciever translated rates
+//   Serial.print(DesiredRateRoll);
+//   Serial.print("  ");
+//   Serial.print(DesiredRatePitch);
+//   Serial.print("  ");
+//   Serial.print(DesiredRateYaw);
+//   Serial.print(" -- ");
+
+// // //IMU values
+  // Serial.print("Acc values: ");
+  // Serial.print("AccX:");
+  // Serial.print(AccX);
+  // Serial.print("  ");
+  // Serial.print("AccY:");
+  // Serial.print(AccY);
+  // Serial.print("  ");
+  // Serial.print("AccZ:");
+  // Serial.print(AccZ);
+  // Serial.print(" -- ");
+  // Print the gyroscope values
+  // Serial.print("Gyro values: ");
+  // Serial.print(RateRoll);
+  // Serial.print("  ");
+  // Serial.print(RatePitch);
+  // Serial.print("  ");
+  // Serial.print(RateYaw);
+  // Serial.print(" -- ");
+
+
+
+//PID outputs
+// Serial.print("PID O/P ");
+// Serial.print(InputPitch);
+//   Serial.print("  ");
+// Serial.print(InputRoll);
+//   Serial.print("  ");
+// Serial.print(InputYaw);
+//   Serial.print(" -- ");
+
+//Angles from MPU
+  // Serial.print("AngleRoll:");
+  // Serial.print(AngleRoll);
+  // //serial.print("  ");
+  //   Serial.print("AnglePitch:");
+  // Serial.print(AnglePitch);
+
+  // // Serial.print("KalmanAngleRoll:");
+  // // Serial.print(KalmanAngleRoll);
+  // // //serial.print("  ");
+  // //   Serial.print("KalmanAnglePitch:");
+  // // Serial.print(KalmanAnglePitch);
+
+
+  
+  //  Serial.println(" ");
+  static int print_counter = 0;
+  print_counter++;
+  
+  if (print_counter >= 50) { // ให้ส่งข้อมูลขึ้นจอแค่ 5 ครั้งต่อวินาที
+    
+    // 1. ปริ้นท์ค่าองศาจากเซนเซอร์ MPU-6050
+    Serial.print("Roll: ");
+    Serial.print(AngleRoll);
+    Serial.print(" | Pitch: ");
+    Serial.print(AnglePitch);
+    
+    // 2. ปริ้นท์ค่าสัญญาณจากรีโมท
+    Serial.print(" || CH1(AIL): ");
+    Serial.print(ReceiverValue[0]);
+    Serial.print(" | CH2(ELE): ");
+    Serial.print(ReceiverValue[1]);
+    Serial.print(" | CH3(THR): ");
+    Serial.print(ReceiverValue[2]);
+    Serial.print(" | CH4(RUD): ");
+    Serial.println(ReceiverValue[3]); // บรรทัดสุดท้ายต้องใช้ println เสมอ
+    
+    print_counter = 0; // รีเซ็ตตัวนับ
+  }
 
 
   while (micros() - LoopTimer < (t*1000000));
